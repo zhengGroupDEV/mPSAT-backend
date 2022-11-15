@@ -1,0 +1,8 @@
+.vscode/
+repeatSave/**/report.json
+repeatSave/**/*.onnx
+repeatSave/**/*.pkl
+repeatSave/**/*.ckpt
+# repeatSave/**/*.txt
+repeatSave/final/**/[1-9]/
+repeatSave/1000/**/[1-9]/

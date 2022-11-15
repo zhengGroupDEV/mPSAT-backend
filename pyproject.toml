@@ -1,0 +1,36 @@
+[tool.poetry]
+name = "mpsat-backend"
+version = "0.1.0"
+description = "the backend of mpsat"
+authors = ["Your Name <you@example.com>"]
+license = "Apache License 2.0"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.11"
+numpy = "^1.23.4"
+pandas = "^1.5.1"
+pyarrow = "^9.0.0"
+matplotlib = "^3.6.1"
+scikit-learn = "=1.1.1"
+ipykernel = "^6.16.0"
+einops = "^0.5.0"
+pytorch-lightning = "^1.7.7"
+# !!!! install torch manually fitst !!!!
+torch = {path = "dependency/torch-1.12.1+cu113-cp39-cp39-win_amd64.whl"}
+# torch = {path = "dependency/torch-1.12.1+cu113-cp310-cp310-linux_x86_64.whl"}
+torch-tb-profiler = "^0.4.0"
+onnxruntime = "^1.13.1"
+onnxruntime-gpu = "^1.13.1"
+Pillow = "^9.3.0"
+
+[tool.poetry.dev-dependencies]
+black = "^22.10.0"
+mariadb = "^1.1.4"
+onnx = "^1.12.0"
+onnxsim = "^0.4.8"
+skl2onnx = "^1.13"
+onnx-tool = "^0.3.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
