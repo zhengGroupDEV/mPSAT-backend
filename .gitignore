@@ -1,4 +1,7 @@
 .vscode/
+__pycache__/
+data/dataset/
+dependency/
 repeatSave/**/report.json
 repeatSave/**/*.onnx
 repeatSave/**/*.pkl
