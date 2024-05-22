@@ -3,6 +3,7 @@ Description: Inference Base Class
 Author: rainyl
 License: Apache License 2.0
 """
+
 import json
 import os
 import warnings
@@ -182,7 +183,12 @@ class MpInferenceBase(object):
         names = [[self.label_name_hash[str(c)] for c in row] for row in labels]
         return names
 
-    def rm_co2(self, y: np.ndarray, fac: float = 0.2):
+    def rm_co2(self, y: NDArray[np.float32], x=None):
+        if x is not None:
+            assert isinstance(x, np.ndarray) and x.shape == y.shape
+            idx = np.argsort(x)
+            x_, y_ = x[idx], y[idx]
+            y = np.interp(self.xx, x_, y_, left=0, right=0)
         c1 = (self.xx >= 2280) & (self.xx <= 2400)
         c2 = (self.xx >= 3570) & (self.xx <= 3750)
         # idxs = (c1 | c2)
@@ -231,7 +237,7 @@ class MpInferenceBase(object):
             if openspecy:
                 yy = self.specy_prep(self.xx, yy, smooth=smooth, baseline=baseline)
             # rmco2
-            yy = self.rm_co2(yy, fac=0.1)
+            yy = self.rm_co2(yy)
             yy = self.minmax(yy)
             new_spec.append(yy)
         x = np.asarray(new_spec, dtype=np.float32)

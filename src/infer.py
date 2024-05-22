@@ -3,6 +3,7 @@ Description: Universal inference of ONNX models
 Author: rainyl
 License: Apache License 2.0
 """
+
 import os
 import random
 from argparse import ArgumentParser, Namespace
@@ -65,13 +66,15 @@ def eval_ds(inferer: MpInferenceBase, args: Namespace):
 
         out_scores = scores.copy()
         out_scores.sort(axis=1)
-        out_scores = np.hstack((names, out_scores[:, ::-1][:, :args.topk]))
+        out_scores = np.hstack((names, out_scores[:, ::-1][:, : args.topk]))
         df_scores = pd.DataFrame(
             data=out_scores,
             columns=["name", *[f"score{i}" for i in range(args.topk)]],
         )
         df_scores.sort_values(by=["name"], ascending=True, inplace=True)
-        df_scores.to_csv(save_to / f"preds_eval_scores.csv", index=False, float_format="%.4f")
+        df_scores.to_csv(
+            save_to / f"preds_eval_scores.csv", index=False, float_format="%.4f"
+        )
 
         out1 = inferer.label2name(out_topk.tolist())
         out1_join = np.asarray([["+".join(c) for c in r] for r in out1], dtype=str)
@@ -90,7 +93,7 @@ def eval_ds(inferer: MpInferenceBase, args: Namespace):
 
 class MpInferenceOnnx(MpInferenceBase):
     model: ort.InferenceSession
-    __supported_models__ = ("dt", "rf", "cnn", "cnn2d", "vit")
+    __supported_models__ = ("dt", "rf", "cnn", "cnn2d")
 
     def __init__(
         self,
@@ -190,7 +193,6 @@ class MpInferenceOnnx(MpInferenceBase):
         self,
         spec: List[NDArray[np.float32]],
         topk: int = 3,
-        return_score: bool = False,
     ):
         x = self.preprocess(spec)
         input_name = self.model.get_inputs()[0].name
@@ -200,11 +202,15 @@ class MpInferenceOnnx(MpInferenceBase):
             out = self.softmax(out, axis=1)
         else:
             out: NDArray[np.float32] = self.model.run(None, inputs)[1]
-        if return_score:
-            return out
-        out_topk = out.argsort(axis=1)[:, ::-1][:, :topk]
-        out1 = self.label2name(out_topk.tolist())
-        return out1
+        out_topk = out.argsort(axis=1)[:, ::-1][:, :topk]  # (N, topk)
+        out1 = self.label2name(out_topk.tolist())  # (N, topk)
+        out2 = [out[i][out_topk[i]] for i in range(out_topk.shape[0])]  # (N, topk)
+        out3 = [  # (N, topk, 2)
+            [out1[i][j], out2[i][j]]
+            for i in range(len(out1))
+            for j in range(len(out1[0]))
+        ]
+        return out3
 
 
 def main(args: Namespace):
@@ -227,7 +233,7 @@ def main(args: Namespace):
             )
         x = df.values
         out = inferer([x], topk=args.topk)
-        print([["+".join(c) for c in row] for row in out])  # type:ignore
+        print(out)
 
 
 if __name__ == "__main__":
